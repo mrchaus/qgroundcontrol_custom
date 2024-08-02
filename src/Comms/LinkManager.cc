@@ -71,7 +71,9 @@ LinkManager::LinkManager(QGCApplication* app, QGCToolbox* toolbox)
 
     qRegisterMetaType<QAbstractSocket::SocketError>();
     qRegisterMetaType<LinkInterface*>("LinkInterface*");
+#ifndef NO_SERIAL_LINK
     qRegisterMetaType<QGCSerialPortInfo>("QGCSerialPortInfo");
+#endif
 }
 
 LinkManager::~LinkManager()
@@ -255,11 +257,6 @@ void LinkManager::setConnectionsSuspended(QString reason)
 {
     _connectionsSuspended = true;
     _connectionsSuspendedReason = reason;
-}
-
-void LinkManager::suspendConfigurationUpdates(bool suspend)
-{
-    _configUpdateSuspended = suspend;
 }
 
 void LinkManager::saveLinkConfigurationList()
@@ -915,7 +912,8 @@ bool LinkManager::_allowAutoConnectToBoard(QGCSerialPortInfo::BoardType_t boardT
 bool LinkManager::_portAlreadyConnected(const QString &portName)
 {
     const QString searchPort = portName.trimmed();
-    for (const SharedLinkInterfacePtr &linkConfig : _rgLinks) {
+    for (const SharedLinkInterfacePtr &linkInterface : _rgLinks) {
+        const SharedLinkConfigurationPtr linkConfig = linkInterface->linkConfiguration();
         const SerialConfiguration* const serialConfig = qobject_cast<const SerialConfiguration*>(linkConfig.get());
         if (serialConfig && (serialConfig->portName() == searchPort)) {
             return true;
@@ -933,13 +931,13 @@ void LinkManager::_updateSerialPorts()
     for (const QGCSerialPortInfo &info: portList) {
         const QString port = info.systemLocation().trimmed(); // + " " + info.description();
         _commPortList += port;
-        _commPortDisplayList += SerialConfiguration::cleanPortDisplayname(port);
+        _commPortDisplayList += SerialConfiguration::cleanPortDisplayName(port);
     }
 }
 
 QStringList LinkManager::serialPortStrings()
 {
-    if (!_commPortDisplayList.size()) {
+    if (_commPortDisplayList.isEmpty()) {
         _updateSerialPorts();
     }
 
@@ -948,7 +946,7 @@ QStringList LinkManager::serialPortStrings()
 
 QStringList LinkManager::serialPorts()
 {
-    if (!_commPortList.size()) {
+    if (_commPortList.isEmpty()) {
         _updateSerialPorts();
     }
 

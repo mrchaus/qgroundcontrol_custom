@@ -81,9 +81,6 @@ public:
     void loadLinkConfigurationList();
     void saveLinkConfigurationList();
 
-    /// Suspend automatic confguration updates (during link maintenance for instance)
-    void suspendConfigurationUpdates(bool suspend);
-
     /// Sets the flag to suspend the all new connections
     ///     @param reason User visible reason to suspend connections
     void setConnectionsSuspended(QString reason);
