@@ -26,6 +26,8 @@ qt_add_plugin(QGCLocation STATIC
     QGCMapUrlEngine.cpp
     QGCMapUrlEngine.h
     QGCTile.h
+    QGCTileCacheDatabase.cpp
+    QGCTileCacheDatabase.h
     QGCTileCacheWorker.cpp
     QGCTileCacheWorker.h
     QGCTileSet.h
@@ -52,6 +54,7 @@ endif()
 target_link_libraries(QGCLocation
     PRIVATE
         Qt6::Positioning
+        Qt6::Sql
         QGC
         Settings
         Utilities
@@ -60,7 +63,6 @@ target_link_libraries(QGCLocation
         Qt6::Location
         Qt6::LocationPrivate
         Qt6::Network
-        Qt6::Sql
         QmlControls
 )
 
