@@ -76,7 +76,7 @@ AnalyzePage {
                     nameFilters:    [qsTr("ULog file (*.ulg)"), qsTr("PX4 log file (*.px4log)"), qsTr("All Files (*)")]
                     defaultSuffix:  "ulg"
                     onAcceptedForLoad: (file) => {
-                        geoController.logFile = openLogFile.file
+                        geoController.logFile = file
                         close()
                     }
                 }
@@ -101,7 +101,7 @@ AnalyzePage {
                     title:          qsTr("Select image directory")
                     selectFolder:   true
                     onAcceptedForLoad: (file) => {
-                        geoController.imageDirectory = selectImageDir.file
+                        geoController.imageDirectory = file
                         close()
                     }
                 }
@@ -126,7 +126,7 @@ AnalyzePage {
                     title:          qsTr("Select save directory")
                     selectFolder:   true
                     onAcceptedForLoad: (file) => {
-                        geoController.saveDirectory = selectDestDir.file
+                        geoController.saveDirectory = file
                         close()
                     }
                 }
