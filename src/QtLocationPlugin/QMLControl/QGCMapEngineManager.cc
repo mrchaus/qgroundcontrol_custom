@@ -15,6 +15,7 @@
 #include "QGCCachedTileSet.h"
 #include "QGCMapUrlEngine.h"
 #include "QGCMapEngine.h"
+#include "QGeoFileTileCacheQGC.h"
 #include "ElevationMapProvider.h"
 #include "QmlObjectListModel.h"
 #include "QGCApplication.h"
@@ -46,7 +47,7 @@ QGCMapEngineManager::QGCMapEngineManager(QObject *parent)
 
     (void) connect(getQGCMapEngine(), &QGCMapEngine::updateTotals, this, &QGCMapEngineManager::_updateTotals);
 
-   _updateDiskFreeSpace();
+    // _updateDiskFreeSpace();
 
     // qCDebug(QGCMapEngineManagerLog) << Q_FUNC_INFO << this;
 }
@@ -298,7 +299,7 @@ void QGCMapEngineManager::taskError(QGCMapTask::TaskType type, const QString &er
 // FIXME: Results are unused
 void QGCMapEngineManager::_updateDiskFreeSpace()
 {
-    const QString path = getQGCMapEngine()->getCachePath();
+    const QString path = QGeoFileTileCacheQGC::getCachePath();
     if (path.isEmpty()) {
         return;
     }
