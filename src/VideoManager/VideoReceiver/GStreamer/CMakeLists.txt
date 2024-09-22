@@ -31,8 +31,8 @@ target_sources(GStreamerReceiver
 if(IOS)
     target_sources(GStreamerReceiver
         PRIVATE
-            gst_ios_init.h
             gst_ios_init.m
+            gst_ios_init.h
     )
 endif()
 
@@ -45,8 +45,3 @@ target_link_libraries(GStreamerReceiver
         Settings
         VideoReceiver
 )
-
-target_compile_definitions(QGC PUBLIC QGC_GST_STREAMING)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_compile_definitions(GStreamerReceiver PRIVATE QGC_INSTALL_RELEASE)
-endif()

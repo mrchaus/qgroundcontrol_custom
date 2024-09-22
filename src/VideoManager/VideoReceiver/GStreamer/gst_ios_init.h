@@ -13,7 +13,9 @@
 
 G_BEGIN_DECLS
 
-void gst_ios_pre_init(void);
-void gst_ios_post_init(void);
+void gst_ios_pre_init();
+
+/// Lower the ranks of filesrc and giosrc so iosavassetsrc is tried first in gst_element_make_from_uri() for file://
+void gst_ios_post_init();
 
 G_END_DECLS

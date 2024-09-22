@@ -60,6 +60,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release")
 if(NOT CMAKE_BUILD_TYPE)
@@ -105,6 +106,11 @@ if(CMAKE_CROSSCOMPILING AND ANDROID)
 endif()
 
 set(BUILD_SHARED_LIBS OFF)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_definitions(QGC_INSTALL_RELEASE)
+endif()
+
 
 #######################################################
 #               Qt6 Configuration

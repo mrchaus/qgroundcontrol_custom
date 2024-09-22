@@ -16,25 +16,22 @@
 
 #include <gst/gst.h>
 
-gboolean gst_qgc_video_sink_bin_plugin_init(GstPlugin *plugin);
+extern gboolean gst_qgc_video_sink_bin_plugin_init(GstPlugin *plugin);
 
-static gboolean
-plugin_init(GstPlugin* plugin)
+static gboolean plugin_init(GstPlugin *plugin)
 {
-    if (!gst_qgc_video_sink_bin_plugin_init(plugin)) {
-        return FALSE;
-    }
-
-    return TRUE;
+    return gst_qgc_video_sink_bin_plugin_init(plugin);
 }
 
+#define GST_PACKAGE_NAME   "GStreamer plugin for QGC's Video Receiver"
+#define GST_PACKAGE_ORIGIN "https://qgroundcontrol.com/"
+#define GST_LICENSE        "LGPL"
 #define PACKAGE            "QGC Video Receiver"
 #define PACKAGE_VERSION    "current"
-#define GST_LICENSE        "LGPL"
-#define GST_PACKAGE_NAME   "GStreamer plugin for QGC's Video Receiver"
-#define GST_PACKAGE_ORIGIN "http://qgroundcontrol.com/"
 
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR, GST_VERSION_MINOR,
-    qgc, "QGC Video Receiver plugin",
-    plugin_init, PACKAGE_VERSION,
-    GST_LICENSE, GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
+    GST_VERSION_MINOR,
+    qgc,
+    "QGC Video Receiver Plugin",
+    plugin_init, PACKAGE_VERSION, GST_LICENSE, GST_PACKAGE_NAME,
+    GST_PACKAGE_ORIGIN)

@@ -18,13 +18,13 @@ target_sources(QtMultimediaReceiver
 
 target_link_libraries(QtMultimediaReceiver
     PRIVATE
+        Qt6::Multimedia
         Qt6::MultimediaQuickPrivate
         Qt6::Quick
         QGC
         Utilities
     PUBLIC
         Qt6::Core
-        Qt6::Multimedia
         VideoReceiver
 )
 
