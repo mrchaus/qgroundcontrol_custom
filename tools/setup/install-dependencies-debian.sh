@@ -80,6 +80,7 @@ DEBIAN_FRONTEND=noninteractive apt -y --quiet install \
 
 # Additional
 DEBIAN_FRONTEND=noninteractive apt -y --quiet install \
+    expat \
     flite1-dev \
     libasound2-dev \
     libass-dev \

@@ -107,7 +107,7 @@ double readTime2(const QByteArray &buf)
     }
 }
 
-bool write(QByteArray &buf, const GeoTagWorker::cameraFeedbackPacket &geotag)
+bool write(QByteArray &buf, const GeoTagWorker::CameraFeedbackPacket &geotag)
 {
     try {
         // Convert QByteArray to std::string for Exiv2
