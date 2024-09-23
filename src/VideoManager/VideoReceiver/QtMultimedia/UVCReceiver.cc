@@ -92,5 +92,5 @@ void UVCReceiver::_checkPermission()
 
 bool UVCReceiver::enabled()
 {
-    return (QMediaDevices::videoInputs().count() > 0);
+    return !QMediaDevices::videoInputs().isEmpty();
 }
