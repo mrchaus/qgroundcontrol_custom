@@ -37,6 +37,13 @@ Item {
     property bool   _showVoltage:       _indicatorDisplay.rawValue === 1
     property bool   _showBoth:          _indicatorDisplay.rawValue === 2
 
+    // Fetch battery settings
+    property var batterySettings: QGroundControl.settingsManager.batteryIndicatorSettings
+
+    // Properties to hold the thresholds
+    property int threshold1: batterySettings.threshold1.rawValue
+    property int threshold2: batterySettings.threshold2.rawValue   
+
     Row {
         id:             batteryIndicatorRow
         anchors.top:    parent.top
@@ -81,17 +88,53 @@ Item {
 
             function getBatteryColor() {
                 switch (battery.chargeState.rawValue) {
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
-                    return qgcPal.text
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
-                    return qgcPal.colorOrange
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
-                case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
-                    return qgcPal.colorRed
-                default:
-                    return qgcPal.text
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
+                        if (!isNaN(battery.percentRemaining.rawValue)) {
+                            if (battery.percentRemaining.rawValue > threshold1) {
+                                return qgcPal.colorGreen 
+                            } else if (battery.percentRemaining.rawValue > threshold2) {
+                                return qgcPal.colorYellowGreen 
+                            } else {
+                                return qgcPal.colorYellow 
+                            }
+                        } else {
+                            return qgcPal.text
+                        }
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
+                        return qgcPal.colorOrange
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
+                        return qgcPal.colorRed
+                    default:
+                        return qgcPal.text
+                }
+            }    
+
+            function getBatterySvgSource() {
+
+                switch (battery.chargeState.rawValue) {
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
+                        if (!isNaN(battery.percentRemaining.rawValue)) {
+                            if (battery.percentRemaining.rawValue > threshold1) {
+                                return "/qmlimages/BatteryGreen.svg"
+                            } else if (battery.percentRemaining.rawValue > threshold2) {
+                                return "/qmlimages/BatteryYellowGreen.svg"
+                            } else {
+                                return "/qmlimages/BatteryYellow.svg"    
+                            } 
+                        }
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
+                        return "/qmlimages/BatteryOrange.svg" // Low with orange svg
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
+                        return "/qmlimages/BatteryCritical.svg" // Critical with red svg
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
+                    case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
+                        return "/qmlimages/BatteryEMERGENCY.svg" // Exclamation mark
+                    default:
+                        return "/qmlimages/Battery.svg" // Fallback if percentage is unavailable
                 }
             }
 
@@ -124,7 +167,7 @@ Item {
                 anchors.bottom:     parent.bottom
                 width:              height
                 sourceSize.width:   width
-                source:             "/qmlimages/Battery.svg"
+                source:             getBatterySvgSource()
                 fillMode:           Image.PreserveAspectFit
                 color:              getBatteryColor()
             }
@@ -138,7 +181,7 @@ Item {
                 QGCLabel {
                     Layout.alignment:       Qt.AlignHCenter
                     verticalAlignment:      Text.AlignVCenter
-                    color:                  getBatteryColor()
+                    color:                  qgcPal.text
                     text:                   getBatteryPercentageText()
                     font.pointSize:         _showBoth ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
                     visible:                _showBoth || _showPercentage
@@ -147,7 +190,7 @@ Item {
                 QGCLabel {
                     Layout.alignment:       Qt.AlignHCenter
                     font.pointSize:         _showBoth ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
-                    color:                  getBatteryColor()
+                    color:                  qgcPal.text
                     text:                   getBatteryVoltageText()
                     visible:                _showBoth || _showVoltage
                 }
@@ -240,6 +283,7 @@ Item {
         }
     }
 
+
     Component {
         id: batteryExpandedComponent
 
@@ -278,6 +322,117 @@ Item {
                         }
                     }
                 }
+                
+            }
+
+            SettingsGroupLayout {
+                heading:        qsTr("Battery State Display")
+                Layout.fillWidth: true
+                spacing: ScreenTools.defaultFontPixelWidth * 0.5
+                
+                RowLayout {
+                    //Layout.fillWidth: true
+                    
+                    QGCColoredImage {
+                        source: "/qmlimages/BatteryGreen.svg"
+                        height: ScreenTools.defaultFontPixelHeight * 5
+                        width: ScreenTools.defaultFontPixelWidth * 7
+                        fillMode: Image.PreserveAspectFit
+                        color: qgcPal.colorGreen
+                    }
+
+                    QGCLabel {
+                        Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 3.5 
+                        text: qsTr("100%")
+                        Layout.leftMargin: -13  
+                    }
+
+                    QGCColoredImage {
+                        source: "/qmlimages/BatteryYellowGreen.svg"
+                        height: ScreenTools.defaultFontPixelHeight * 5
+                        width: ScreenTools.defaultFontPixelWidth * 7
+                        fillMode: Image.PreserveAspectFit
+                        color: qgcPal.colorYellowGreen
+                    }
+
+                    FactTextField {
+                        id: threshold1Field
+                        fact: batterySettings.threshold1
+                        validator: IntValidator { bottom: 16 } // Value is at least 16
+                        implicitWidth: ScreenTools.defaultFontPixelWidth * 6  // Reduced width
+                        Layout.leftMargin: -10
+                        //Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 2  // Reduced width using Layout.preferredWidth
+                        height: ScreenTools.defaultFontPixelHeight * 1.5
+                        onEditingFinished: {
+                            let newValue = parseInt(text);
+                            if (newValue > batterySettings.threshold2.rawValue) {
+                                batterySettings.threshold1.rawValue = newValue;
+                            } else {
+                                // Adjust value if invalid
+                                batterySettings.threshold1.rawValue = batterySettings.threshold2.rawValue - 1;
+                                text = batterySettings.threshold1.rawValue.toString(); // Update displayed text
+                            }
+                        }                                
+                    }
+
+                    QGCColoredImage {
+                        source: "/qmlimages/BatteryYellow.svg"
+                        height: ScreenTools.defaultFontPixelHeight * 5
+                        width: ScreenTools.defaultFontPixelWidth * 7
+                        fillMode: Image.PreserveAspectFit
+                        color: qgcPal.colorYellow
+                    }
+
+                    FactTextField {
+                        id: threshold2Field
+                        fact: batterySettings.threshold2
+                        validator: IntValidator { bottom: 16 }
+                        implicitWidth: ScreenTools.defaultFontPixelWidth * 6
+                        Layout.leftMargin: -10
+                        height: ScreenTools.defaultFontPixelHeight * 1.5
+                        onEditingFinished: {
+                            let newValue = parseInt(text);
+                            if (newValue < batterySettings.threshold1.rawValue) {
+                                batterySettings.threshold2.rawValue = newValue;
+                            } else {
+                                batterySettings.threshold2.rawValue = batterySettings.threshold1.rawValue - 1;
+                                text = batterySettings.threshold2.rawValue.toString(); 
+                            }
+                        }
+                    }
+
+                    QGCColoredImage {
+                        source: "/qmlimages/BatteryOrange.svg"
+                        height: ScreenTools.defaultFontPixelHeight * 5
+                        width: ScreenTools.defaultFontPixelWidth * 7
+                        fillMode: Image.PreserveAspectFit
+                        color: qgcPal.colorOrange
+                    }
+
+                    QGCLabel {
+                        Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 2.5
+                        text: qsTr("Low")
+                        Layout.leftMargin: -13
+                    }
+
+                    QGCColoredImage {
+                        source: "/qmlimages/BatteryCritical.svg"
+                        height: ScreenTools.defaultFontPixelHeight * 5
+                        width: ScreenTools.defaultFontPixelWidth * 7
+                        fillMode: Image.PreserveAspectFit
+                        color: qgcPal.colorRed
+                    }
+
+                    QGCLabel {
+                        Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 3.5  
+                        text: qsTr("Critical")
+                        Layout.leftMargin: -13
+                    }
+
+                }
+                    
+                    
+            
             }
         }
     }
